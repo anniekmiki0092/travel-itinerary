@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>旅行のしおり</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<meta name="theme-color" content="#00a99d" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sea: #00a99d;
+    --sea-dark: #00847a;
+    --sea-tint: #e3f7f4;
+    --sunset: #ff8a5b;
+    --sunset-dark: #f2703c;
+    --sunset-tint: #ffece2;
+    --sand: #fffaf0;
+    --hibiscus: #ff5d8f;
+  }
+
+  body {
+    font-family: "游ゴシック", "Yu Gothic", "Meiryo", sans-serif;
+    background: linear-gradient(180deg, #eafcfa 0%, var(--sand) 220px);
+    color: #3a3a3a;
+    min-height: 100vh;
+    padding-bottom: 24px;
+  }
+
+  header {
+    background: linear-gradient(120deg, var(--sea) 0%, #22c3b6 45%, var(--sunset) 100%);
+    color: white;
+    padding: 20px 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::after {
+    content: "🌴";
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%) scaleX(-1);
+    font-size: 40px;
+    opacity: 0.35;
+  }
+
+  header .title { font-size: 19px; font-weight: bold; letter-spacing: 0.02em; }
+  header .trip-title { font-size: 13px; opacity: 0.95; margin-top: 6px; }
+
+  nav.tabs {
+    display: flex;
+    background: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+
+  nav.tabs button {
+    flex: 1;
+    padding: 12px 4px;
+    border: none;
+    background: none;
+    font-size: 13px;
+    font-weight: bold;
+    color: #9aa0a6;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+  }
+
+  nav.tabs button.active {
+    color: var(--sunset-dark);
+    border-bottom-color: var(--sunset);
+  }
+
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 4px 14px rgba(0, 130, 120, 0.08);
+    margin-bottom: 16px;
+    border: 1px solid #f0ede4;
+  }
+
+  .card h2 {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    color: var(--sea-dark);
+    border-bottom: 2px solid var(--sea-tint);
+    padding-bottom: 8px;
+  }
+
+  label { font-size: 12px; color: #7a7a7a; display: block; margin-bottom: 4px; }
+  .field { margin-bottom: 10px; }
+
+  input[type="text"], input[type="date"], input[type="time"], input[type="tel"], textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #e6e0d4;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fffdf9;
+  }
+
+  input:focus, textarea:focus { outline: none; border-color: var(--sea); }
+
+  textarea { min-height: 90px; resize: vertical; }
+
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+
+  button.primary {
+    width: 100%;
+    padding: 11px;
+    background: linear-gradient(120deg, var(--sunset), var(--hibiscus));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(255, 93, 143, 0.3);
+  }
+
+  button.primary:disabled { background: #f0c4b8; box-shadow: none; }
+  button.primary:hover:not(:disabled) { background: linear-gradient(120deg, var(--sunset-dark), var(--hibiscus)); }
+
+  button.ghost {
+    background: var(--sea-tint);
+    color: var(--sea-dark);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  button.ghost:hover { background: #cdf0ea; }
+
+  .icon-btn {
+    background: #ffe1e1;
+    color: #dc2626;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 9px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .icon-btn:hover { background: #ffc9c9; }
+
+  .day-block { margin-bottom: 14px; }
+  .day-block .day-header {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--sea-dark);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .item-row {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee2d0;
+    align-items: flex-start;
+  }
+  .item-row:last-child { border-bottom: none; }
+
+  .item-time { font-size: 13px; font-weight: bold; color: var(--sunset-dark); min-width: 46px; }
+  .item-body { flex: 1; font-size: 14px; }
+  .item-body .place { color: #666; font-size: 12px; margin-top: 2px; }
+  .item-body .note { color: #999; font-size: 12px; margin-top: 2px; }
+
+  .lodging-card { border: 1px solid var(--sea-tint); border-radius: 12px; padding: 12px; margin-bottom: 10px; background: #fbfffe; }
+  .lodging-card .name { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
+  .lodging-card .meta { font-size: 12px; color: #666; margin-bottom: 2px; }
+  .lodging-card a.map-link {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--sea-dark);
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  ul.check-list { list-style: none; }
+  ul.check-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee2d0;
+  }
+  ul.check-list li:last-child { border-bottom: none; }
+  ul.check-list li.checked span.label { text-decoration: line-through; color: #aaa; }
+  ul.check-list input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--sunset); }
+  ul.check-list span.label { flex: 1; font-size: 14px; }
+
+  .empty { color: #b8b8b8; font-size: 13px; padding: 8px 0; }
+
+  .add-row { display: flex; gap: 8px; margin-top: 8px; }
+  .add-row input { flex: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title">🌺 旅行のしおり</div>
+  <div class="trip-title" id="tripHeaderLabel">まだ旅程が入力されていません</div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="schedule">📅 日程</button>
+  <button class="tab-btn" data-tab="lodging">🏨 宿泊先</button>
+  <button class="tab-btn" data-tab="packing">🎒 持ち物</button>
+  <button class="tab-btn" data-tab="souvenir">🎁 お土産</button>
+</nav>
+
+<div class="container">
+
+  <!-- 日程タブ -->
+  <div class="tab-panel active" id="tab-schedule">
+
+    <div class="card">
+      <h2>旅行タイトル・期間</h2>
+      <div class="field">
+        <label>タイトル</label>
+        <input type="text" id="tripTitle" placeholder="例: 沖縄旅行" oninput="updateTripMeta()" />
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>開始日</label>
+          <input type="date" id="tripStart" oninput="updateTripMeta()" />
+        </div>
+        <div class="field">
+          <label>終了日</label>
+          <input type="date" id="tripEnd" oninput="updateTripMeta()" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>日程</h2>
+      <div id="daysList"></div>
+      <div class="add-row">
+        <input type="date" id="newDayDate" />
+        <button class="ghost" onclick="addDay()">＋ 日付を追加</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 宿泊先タブ -->
+  <div class="tab-panel" id="tab-lodging">
+    <div class="card">
+      <h2>宿泊先一覧</h2>
+      <div id="lodgingsList"></div>
+      <button class="ghost" onclick="addLodging()" style="width:100%;margin-top:8px;">＋ 宿泊先を追加</button>
+    </div>
+  </div>
+
+  <!-- 持ち物タブ -->
+  <div class="tab-panel" id="tab-packing">
+    <div class="card">
+      <h2>持ち物チェックリスト</h2>
+      <ul class="check-list" id="packingList"></ul>
+      <div class="add-row">
+        <input type="text" id="newPackingItem" placeholder="持ち物を入力" onkeydown="if(event.key==='Enter') addPackingItem()" />
+        <button class="ghost" onclick="addPackingItem()">追加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- お土産タブ -->
+  <div class="tab-panel" id="tab-souvenir">
+    <div class="card">
+      <h2>お土産リスト</h2>
+      <ul class="check-list" id="souvenirList"></ul>
+      <div class="add-row">
+        <input type="text" id="newSouvenirItem" placeholder="お土産・買うものを入力" onkeydown="if(event.key==='Enter') addSouvenirItem()" />
+        <button class="ghost" onclick="addSouvenirItem()">追加</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = "itinerary";
+
+function emptyState() {
+  return {
+    trip: { title: "", startDate: "", endDate: "" },
+    days: [],
+    lodgings: [],
+    packing: [],
+    souvenirs: [],
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return emptyState();
+    const parsed = JSON.parse(raw);
+    return Object.assign(emptyState(), parsed);
+  } catch {
+    return emptyState();
+  }
+}
+
+let state = loadState();
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function uid() {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+// ---------- タブ切り替え ----------
+document.querySelectorAll(".tab-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+  });
+});
+
+// ---------- 旅行タイトル・期間 ----------
+function updateTripMeta() {
+  state.trip.title = document.getElementById("tripTitle").value;
+  state.trip.startDate = document.getElementById("tripStart").value;
+  state.trip.endDate = document.getElementById("tripEnd").value;
+  saveState();
+  renderHeader();
+}
+
+function renderHeader() {
+  const label = document.getElementById("tripHeaderLabel");
+  const { title, startDate, endDate } = state.trip;
+  if (!title && !startDate) {
+    label.textContent = "まだ旅程が入力されていません";
+    return;
+  }
+  let text = title || "無題の旅行";
+  if (startDate) text += `　${startDate}${endDate ? " 〜 " + endDate : ""}`;
+  label.textContent = text;
+}
+
+// ---------- 日程 ----------
+function sortDays() {
+  state.days.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  state.days.forEach((d) => d.items.sort((a, b) => (a.time || "").localeCompare(b.time || "")));
+}
+
+function addDay() {
+  const dateInput = document.getElementById("newDayDate");
+  const date = dateInput.value;
+  if (!date) { alert("日付を選択してください"); return; }
+  if (state.days.some((d) => d.date === date)) { alert("その日付はすでにあります"); return; }
+  state.days.push({ date, items: [] });
+  dateInput.value = "";
+  sortDays();
+  saveState();
+  renderDays();
+}
+
+function removeDay(date) {
+  if (!confirm(`${date} を削除しますか？`)) return;
+  state.days = state.days.filter((d) => d.date !== date);
+  saveState();
+  renderDays();
+}
+
+function addItem(date) {
+  const day = state.days.find((d) => d.date === date);
+  if (!day) return;
+  day.items.push({ time: "", title: "", place: "", address: "", note: "" });
+  saveState();
+  renderDays();
+}
+
+function removeItem(date, idx) {
+  const day = state.days.find((d) => d.date === date);
+  if (!day) return;
+  day.items.splice(idx, 1);
+  saveState();
+  renderDays();
+}
+
+function updateItem(date, idx, field, value) {
+  const day = state.days.find((d) => d.date === date);
+  if (!day) return;
+  day.items[idx][field] = value;
+  saveState();
+}
+
+function formatDateWithDow(dateStr) {
+  if (!dateStr) return "";
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const days = ["日", "月", "火", "水", "木", "金", "土"];
+  const dow = new Date(y, m - 1, d).getDay();
+  return `${m}月${d}日（${days[dow]}）`;
+}
+
+function renderDays() {
+  const container = document.getElementById("daysList");
+  container.innerHTML = "";
+
+  if (state.days.length === 0) {
+    container.innerHTML = '<div class="empty">日付を追加してください</div>';
+    return;
+  }
+
+  state.days.forEach((day) => {
+    const block = document.createElement("div");
+    block.className = "day-block";
+
+    const header = document.createElement("div");
+    header.className = "day-header";
+    header.innerHTML = `<span>${formatDateWithDow(day.date)}</span>`;
+    const delBtn = document.createElement("button");
+    delBtn.className = "icon-btn";
+    delBtn.textContent = "削除";
+    delBtn.onclick = () => removeDay(day.date);
+    header.appendChild(delBtn);
+    block.appendChild(header);
+
+    day.items.forEach((item, idx) => {
+      const row = document.createElement("div");
+      row.className = "item-row";
+      row.innerHTML = `
+        <input type="time" value="${item.time || ""}" style="min-width:90px;" />
+        <div class="item-body" style="width:100%;">
+          <input type="text" placeholder="予定（例: フライト出発）" value="${escapeAttr(item.title)}" style="margin-bottom:6px;" />
+          <input type="text" placeholder="場所・住所" value="${escapeAttr(item.place || item.address || "")}" style="margin-bottom:6px;" />
+          <input type="text" placeholder="メモ" value="${escapeAttr(item.note)}" />
+        </div>
+        <button class="icon-btn">✕</button>
+      `;
+      const inputs = row.querySelectorAll("input");
+      inputs[0].oninput = (e) => updateItem(day.date, idx, "time", e.target.value);
+      inputs[1].oninput = (e) => updateItem(day.date, idx, "title", e.target.value);
+      inputs[2].oninput = (e) => updateItem(day.date, idx, "place", e.target.value);
+      inputs[3].oninput = (e) => updateItem(day.date, idx, "note", e.target.value);
+      row.querySelector(".icon-btn").onclick = () => removeItem(day.date, idx);
+      block.appendChild(row);
+    });
+
+    const addBtn = document.createElement("button");
+    addBtn.className = "ghost";
+    addBtn.style.width = "100%";
+    addBtn.style.marginTop = "8px";
+    addBtn.textContent = "＋ 予定を追加";
+    addBtn.onclick = () => addItem(day.date);
+    block.appendChild(addBtn);
+
+    container.appendChild(block);
+  });
+}
+
+function escapeAttr(str) {
+  return (str || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+// ---------- 宿泊先 ----------
+function addLodging() {
+  state.lodgings.push({ name: "", address: "", checkin: "", checkout: "", phone: "", note: "" });
+  saveState();
+  renderLodgings();
+}
+
+function removeLodging(idx) {
+  if (!confirm("この宿泊先を削除しますか？")) return;
+  state.lodgings.splice(idx, 1);
+  saveState();
+  renderLodgings();
+}
+
+function updateLodging(idx, field, value) {
+  state.lodgings[idx][field] = value;
+  saveState();
+  if (field === "address" || field === "name") renderLodgings();
+}
+
+function renderLodgings() {
+  const container = document.getElementById("lodgingsList");
+  container.innerHTML = "";
+
+  if (state.lodgings.length === 0) {
+    container.innerHTML = '<div class="empty">宿泊先を追加してください</div>';
+    return;
+  }
+
+  state.lodgings.forEach((lodging, idx) => {
+    const card = document.createElement("div");
+    card.className = "lodging-card";
+    const mapQuery = encodeURIComponent(lodging.address || lodging.name || "");
+    card.innerHTML = `
+      <div class="field"><label>宿泊先名</label><input type="text" value="${escapeAttr(lodging.name)}" data-f="name" /></div>
+      <div class="field"><label>住所</label><input type="text" value="${escapeAttr(lodging.address)}" data-f="address" /></div>
+      <div class="row">
+        <div class="field"><label>チェックイン</label><input type="text" value="${escapeAttr(lodging.checkin)}" data-f="checkin" placeholder="YYYY-MM-DD HH:MM" /></div>
+        <div class="field"><label>チェックアウト</label><input type="text" value="${escapeAttr(lodging.checkout)}" data-f="checkout" placeholder="YYYY-MM-DD HH:MM" /></div>
+      </div>
+      <div class="field"><label>電話番号</label><input type="tel" value="${escapeAttr(lodging.phone)}" data-f="phone" /></div>
+      <div class="field"><label>メモ（予約番号など）</label><input type="text" value="${escapeAttr(lodging.note)}" data-f="note" /></div>
+      ${mapQuery ? `<a class="map-link" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${mapQuery}">📍 Google Mapsで開く</a>` : ""}
+      <div style="text-align:right;margin-top:8px;"><button class="icon-btn">削除</button></div>
+    `;
+    card.querySelectorAll("input").forEach((inp) => {
+      inp.oninput = (e) => updateLodging(idx, e.target.dataset.f, e.target.value);
+    });
+    card.querySelector(".icon-btn").onclick = () => removeLodging(idx);
+    container.appendChild(card);
+  });
+}
+
+// ---------- チェックリスト共通（持ち物・お土産） ----------
+function addCheckItem(listKey, inputId) {
+  const input = document.getElementById(inputId);
+  const text = input.value.trim();
+  if (!text) return;
+  state[listKey].push({ id: uid(), text, checked: false });
+  input.value = "";
+  saveState();
+  renderCheckList(listKey);
+}
+
+function toggleCheckItem(listKey, id) {
+  const item = state[listKey].find((i) => i.id === id);
+  if (!item) return;
+  item.checked = !item.checked;
+  saveState();
+  renderCheckList(listKey);
+}
+
+function removeCheckItem(listKey, id) {
+  state[listKey] = state[listKey].filter((i) => i.id !== id);
+  saveState();
+  renderCheckList(listKey);
+}
+
+function renderCheckList(listKey) {
+  const elId = listKey === "packing" ? "packingList" : "souvenirList";
+  const ul = document.getElementById(elId);
+  ul.innerHTML = "";
+
+  if (state[listKey].length === 0) {
+    ul.innerHTML = '<div class="empty">まだ何も追加されていません</div>';
+    return;
+  }
+
+  state[listKey].forEach((item) => {
+    const li = document.createElement("li");
+    if (item.checked) li.classList.add("checked");
+    li.innerHTML = `
+      <input type="checkbox" ${item.checked ? "checked" : ""} />
+      <span class="label">${escapeAttr(item.text)}</span>
+      <button class="icon-btn">✕</button>
+    `;
+    li.querySelector("input").onchange = () => toggleCheckItem(listKey, item.id);
+    li.querySelector(".icon-btn").onclick = () => removeCheckItem(listKey, item.id);
+    ul.appendChild(li);
+  });
+}
+
+function addPackingItem() { addCheckItem("packing", "newPackingItem"); }
+function addSouvenirItem() { addCheckItem("souvenirs", "newSouvenirItem"); }
+
+function renderAll() {
+  document.getElementById("tripTitle").value = state.trip.title || "";
+  document.getElementById("tripStart").value = state.trip.startDate || "";
+  document.getElementById("tripEnd").value = state.trip.endDate || "";
+  renderHeader();
+  renderDays();
+  renderLodgings();
+  renderCheckList("packing");
+  renderCheckList("souvenirs");
+}
+
+renderAll();
+
+// ---------- PWA登録 ----------
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
