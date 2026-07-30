@@ -213,6 +213,9 @@
 
   .empty { color: #b8b8b8; font-size: 13px; padding: 8px 0; }
 
+  .status-msg.error { color: #dc2626; }
+  .status-msg.ok { color: var(--sea-dark); }
+
   .add-row { display: flex; gap: 8px; margin-top: 8px; }
   .add-row input { flex: 1; }
 </style>
@@ -232,6 +235,15 @@
 </nav>
 
 <div class="container">
+
+  <details class="card" id="importCard">
+    <summary style="cursor:pointer;font-size:13px;font-weight:bold;color:var(--sea-dark);">データを読み込む（インポート）</summary>
+    <div class="field" style="margin-top:10px;">
+      <textarea id="importText" placeholder="渡されたインポート用のテキスト（JSON）をここに貼り付け"></textarea>
+    </div>
+    <button class="ghost" style="width:100%;" onclick="importData()">読み込んで反映</button>
+    <div class="status-msg" id="importStatus" style="font-size:12px;margin-top:8px;min-height:16px;"></div>
+  </details>
 
   <!-- 日程タブ -->
   <div class="tab-panel active" id="tab-schedule">
@@ -312,7 +324,6 @@ function emptyState() {
     souvenirs: [],
   };
 }
-
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -585,6 +596,37 @@ function renderCheckList(listKey) {
 
 function addPackingItem() { addCheckItem("packing", "newPackingItem"); }
 function addSouvenirItem() { addCheckItem("souvenirs", "newSouvenirItem"); }
+
+// ---------- データのインポート（端末内で完結。サーバーには一切送信されない） ----------
+function importData() {
+  const textEl = document.getElementById("importText");
+  const statusEl = document.getElementById("importStatus");
+  const raw = textEl.value.trim();
+
+  if (!raw) {
+    statusEl.textContent = "テキストを貼り付けてください";
+    statusEl.className = "status-msg error";
+    return;
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    statusEl.textContent = "JSONとして読み取れませんでした";
+    statusEl.className = "status-msg error";
+    return;
+  }
+
+  state = Object.assign(emptyState(), parsed);
+  sortDays();
+  saveState();
+  renderAll();
+  textEl.value = "";
+  statusEl.textContent = "読み込みました";
+  statusEl.className = "status-msg ok";
+  document.getElementById("importCard").removeAttribute("open");
+}
 
 function renderAll() {
   document.getElementById("tripTitle").value = state.trip.title || "";
