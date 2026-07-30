@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6ad0d9"/>
+      <stop offset="55%" stop-color="#a7e8da"/>
+      <stop offset="100%" stop-color="#ffe0b0"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5fe0c9"/>
+      <stop offset="100%" stop-color="#00897f"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff8e0" stop-opacity="0.95"/>
+      <stop offset="60%" stop-color="#ffd77a" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#ffd77a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="0" y="0" width="800" height="170" fill="url(#sky)"/>
+
+  <circle cx="590" cy="150" r="70" fill="url(#sun)"/>
+  <circle cx="590" cy="150" r="24" fill="#fff6e0"/>
+
+  <!-- 遠くの島影（ランカウイ島などのカルスト地形イメージ） -->
+  <path d="M0,168 Q40,148 90,166 Q130,150 180,167 L180,178 L0,178 Z" fill="#0d6e66" opacity="0.35"/>
+  <path d="M470,171 Q535,138 610,168 Q660,148 720,169 L720,180 L470,180 Z" fill="#0d6e66" opacity="0.28"/>
+
+  <rect x="0" y="165" width="800" height="95" fill="url(#sea)"/>
+  <path d="M0,190 Q100,182 200,190 T400,190 T600,190 T800,190" stroke="#ffffff" stroke-opacity="0.25" stroke-width="3" fill="none"/>
+  <path d="M0,215 Q100,207 200,215 T400,215 T600,215 T800,215" stroke="#ffffff" stroke-opacity="0.2" stroke-width="3" fill="none"/>
+  <path d="M0,240 Q100,232 200,240 T400,240 T600,240 T800,240" stroke="#ffffff" stroke-opacity="0.15" stroke-width="3" fill="none"/>
+
+  <path d="M0,255 Q200,235 400,252 T800,250 L800,300 L0,300 Z" fill="#ffe9c2"/>
+
+  <!-- 左の椰子の木 -->
+  <g transform="translate(60,300)">
+    <path d="M0,0 C-4,-60 8,-110 28,-150" stroke="#3a2b1e" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <g fill="#0d6e5f">
+      <path d="M28,-150 C-10,-165 -40,-150 -55,-120 C-20,-135 5,-140 28,-150 Z"/>
+      <path d="M28,-150 C0,-180 -20,-205 -15,-230 C10,-205 25,-180 28,-150 Z"/>
+      <path d="M28,-150 C55,-175 90,-175 110,-155 C75,-160 48,-158 28,-150 Z"/>
+      <path d="M28,-150 C60,-140 85,-115 90,-90 C60,-115 40,-135 28,-150 Z"/>
+      <path d="M28,-150 C15,-180 20,-205 40,-225 C40,-195 35,-170 28,-150 Z"/>
+    </g>
+  </g>
+
+  <!-- 右の椰子の木 -->
+  <g transform="translate(730,300) scale(-1,1)">
+    <path d="M0,0 C-4,-55 6,-100 24,-135" stroke="#2e2118" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <g fill="#0b5c50">
+      <path d="M24,-135 C-8,-148 -35,-135 -48,-108 C-18,-122 4,-127 24,-135 Z"/>
+      <path d="M24,-135 C0,-160 -18,-182 -13,-205 C10,-182 22,-160 24,-135 Z"/>
+      <path d="M24,-135 C48,-157 78,-157 96,-140 C64,-144 42,-142 24,-135 Z"/>
+      <path d="M24,-135 C52,-126 74,-104 80,-82 C52,-104 34,-122 24,-135 Z"/>
+    </g>
+  </g>
+</svg>

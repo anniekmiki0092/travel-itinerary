@@ -1,9 +1,10 @@
-const CACHE_NAME = "shiori-shell-v3";
+const CACHE_NAME = "shiori-shell-v4";
 const SHELL_FILES = [
   "./",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
+  "./images/header-beach.svg",
 ];
 
 self.addEventListener("install", (event) => {
