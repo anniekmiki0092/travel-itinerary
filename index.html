@@ -222,10 +222,21 @@
     padding: 8px 0;
     border-bottom: 1px dashed #eee2d0;
   }
+  ul.check-list li.has-note { align-items: flex-start; }
+  ul.check-list li.has-note input[type="checkbox"] { margin-top: 3px; }
   ul.check-list li:last-child { border-bottom: none; }
   ul.check-list li.checked span.label { text-decoration: line-through; color: #aaa; }
-  ul.check-list input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--sunset); }
+  ul.check-list input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--sunset); flex-shrink: 0; }
   ul.check-list span.label { flex: 1; font-size: 14px; }
+  ul.check-list .label-wrap { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  ul.check-list .item-note {
+    font-size: 12px;
+    color: #777;
+    padding: 5px 8px;
+    border: 1px solid #eee2d0;
+    border-radius: 6px;
+    background: #fffdf9;
+  }
 
   .empty { color: #b8b8b8; font-size: 13px; padding: 8px 0; }
 
@@ -319,8 +330,11 @@
     <div class="card">
       <h2>お土産リスト</h2>
       <ul class="check-list" id="souvenirList"></ul>
+      <div class="field" style="margin-top:10px;">
+        <input type="text" id="newSouvenirItem" placeholder="お土産・買うものを入力" />
+      </div>
       <div class="add-row">
-        <input type="text" id="newSouvenirItem" placeholder="お土産・買うものを入力" onkeydown="if(event.key==='Enter') addSouvenirItem()" />
+        <input type="text" id="newSouvenirNote" placeholder="メモ（特徴・購入場所など、任意）" onkeydown="if(event.key==='Enter') addSouvenirItem()" />
         <button class="ghost" onclick="addSouvenirItem()">追加</button>
       </div>
     </div>
@@ -598,10 +612,18 @@ function removeCheckItem(listKey, id) {
   renderCheckList(listKey);
 }
 
+function updateCheckItemNote(listKey, id, value) {
+  const item = state[listKey].find((i) => i.id === id);
+  if (!item) return;
+  item.note = value;
+  saveState();
+}
+
 function renderCheckList(listKey) {
   const elId = listKey === "packing" ? "packingList" : "souvenirList";
   const ul = document.getElementById(elId);
   ul.innerHTML = "";
+  const showNote = listKey === "souvenirs";
 
   if (state[listKey].length === 0) {
     ul.innerHTML = '<div class="empty">まだ何も追加されていません</div>';
@@ -611,19 +633,37 @@ function renderCheckList(listKey) {
   state[listKey].forEach((item) => {
     const li = document.createElement("li");
     if (item.checked) li.classList.add("checked");
+    if (showNote) li.classList.add("has-note");
     li.innerHTML = `
       <input type="checkbox" ${item.checked ? "checked" : ""} />
-      <span class="label">${escapeAttr(item.text)}</span>
+      <div class="label-wrap">
+        <span class="label">${escapeAttr(item.text)}</span>
+        ${showNote ? `<input type="text" class="item-note" placeholder="メモ（特徴・購入場所など）" value="${escapeAttr(item.note || "")}" />` : ""}
+      </div>
       <button class="icon-btn">✕</button>
     `;
-    li.querySelector("input").onchange = () => toggleCheckItem(listKey, item.id);
+    li.querySelector("input[type=checkbox]").onchange = () => toggleCheckItem(listKey, item.id);
+    if (showNote) {
+      li.querySelector(".item-note").oninput = (e) => updateCheckItemNote(listKey, item.id, e.target.value);
+    }
     li.querySelector(".icon-btn").onclick = () => removeCheckItem(listKey, item.id);
     ul.appendChild(li);
   });
 }
 
 function addPackingItem() { addCheckItem("packing", "newPackingItem"); }
-function addSouvenirItem() { addCheckItem("souvenirs", "newSouvenirItem"); }
+
+function addSouvenirItem() {
+  const textInput = document.getElementById("newSouvenirItem");
+  const noteInput = document.getElementById("newSouvenirNote");
+  const text = textInput.value.trim();
+  if (!text) return;
+  state.souvenirs.push({ id: uid(), text, note: noteInput.value.trim(), checked: false });
+  textInput.value = "";
+  noteInput.value = "";
+  saveState();
+  renderCheckList("souvenirs");
+}
 
 // ---------- データのインポート（端末内で完結。サーバーには一切送信されない） ----------
 function importData() {
