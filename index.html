@@ -161,16 +161,32 @@
 
   .icon-btn:hover { background: #ffc9c9; }
 
-  .day-block { margin-bottom: 14px; }
+  .day-block {
+    margin-bottom: 10px;
+    border: 1px solid var(--sea-tint);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: #fbfffe;
+  }
+  .day-block summary { cursor: pointer; list-style: none; }
+  .day-block summary::-webkit-details-marker { display: none; }
   .day-block .day-header {
     font-size: 13px;
     font-weight: bold;
     color: var(--sea-dark);
-    margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
+  .day-block .day-count { font-weight: normal; color: #999; margin-left: 6px; }
+  .day-block .chevron {
+    display: inline-block;
+    margin-right: 6px;
+    font-size: 10px;
+    transition: transform 0.15s ease;
+  }
+  .day-block[open] .chevron { transform: rotate(90deg); }
+  .day-block .day-body { padding-top: 10px; }
 
   .item-row {
     display: flex;
@@ -389,6 +405,7 @@ function addDay() {
   if (state.days.some((d) => d.date === date)) { alert("その日付はすでにあります"); return; }
   state.days.push({ date, items: [] });
   dateInput.value = "";
+  openDays.add(date);
   sortDays();
   saveState();
   renderDays();
@@ -432,6 +449,8 @@ function formatDateWithDow(dateStr) {
   return `${m}月${d}日（${days[dow]}）`;
 }
 
+let openDays = new Set();
+
 function renderDays() {
   const container = document.getElementById("daysList");
   container.innerHTML = "";
@@ -442,18 +461,26 @@ function renderDays() {
   }
 
   state.days.forEach((day) => {
-    const block = document.createElement("div");
+    const block = document.createElement("details");
     block.className = "day-block";
+    block.open = openDays.has(day.date);
+    block.addEventListener("toggle", () => {
+      if (block.open) openDays.add(day.date);
+      else openDays.delete(day.date);
+    });
 
-    const header = document.createElement("div");
+    const header = document.createElement("summary");
     header.className = "day-header";
-    header.innerHTML = `<span>${formatDateWithDow(day.date)}</span>`;
+    header.innerHTML = `<span><span class="chevron">▶</span>${formatDateWithDow(day.date)}<span class="day-count">${day.items.length}件</span></span>`;
     const delBtn = document.createElement("button");
     delBtn.className = "icon-btn";
     delBtn.textContent = "削除";
-    delBtn.onclick = () => removeDay(day.date);
+    delBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); removeDay(day.date); };
     header.appendChild(delBtn);
     block.appendChild(header);
+
+    const body = document.createElement("div");
+    body.className = "day-body";
 
     day.items.forEach((item, idx) => {
       const row = document.createElement("div");
@@ -473,7 +500,7 @@ function renderDays() {
       inputs[2].oninput = (e) => updateItem(day.date, idx, "place", e.target.value);
       inputs[3].oninput = (e) => updateItem(day.date, idx, "note", e.target.value);
       row.querySelector(".icon-btn").onclick = () => removeItem(day.date, idx);
-      block.appendChild(row);
+      body.appendChild(row);
     });
 
     const addBtn = document.createElement("button");
@@ -482,8 +509,9 @@ function renderDays() {
     addBtn.style.marginTop = "8px";
     addBtn.textContent = "＋ 予定を追加";
     addBtn.onclick = () => addItem(day.date);
-    block.appendChild(addBtn);
+    body.appendChild(addBtn);
 
+    block.appendChild(body);
     container.appendChild(block);
   });
 }
